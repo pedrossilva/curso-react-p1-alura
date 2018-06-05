@@ -21,7 +21,39 @@ class LivroForm extends Component {
     this.state = Object.assign({}, this.stateDefault)
 
     this.handleChange = this.handleChange.bind(this)
+    this.formConfig = this.formConfig.bind(this)
     this.save = this.save.bind(this)
+    this.fc = this.formConfig()
+  }
+
+  formConfig() {
+    return {
+      default: {
+        onChange: this.handleChange,
+        value: k => this.state.form[k]
+      },
+      controls: [
+        {
+          label: "Título",
+          id: "titulo",
+          type: "text",
+          name:"titulo"
+        },
+        {
+          label: "Autor",
+          id: "autorId",
+          type: "select",
+          name:"autorId",
+          selectList: () => this.state.autores
+        },
+        {
+          label: "Preço",
+          id: "preco",
+          type: "text",
+          name:"preco"
+        }
+      ]
+    }
   }
 
   handleChange(event) {
@@ -48,18 +80,7 @@ class LivroForm extends Component {
       })
       .catch(error => {
         const res = error.response
-        if(res.status === 400) {
-          // const errors = (res.data.errors || []).reduce((va, e) => {
-          //   va[e.field] = e
-          //   return va
-          // }, {})
-          // const errors = (res.data.errors || []).map(e => [e.field]:e)
-          // this.setState({_errors: errors})
-          new ErrorHandle().publish(res.data)
-          // console.log('STATE ERRORS', this.state._errors)
-        }
-        // console.log('ERROR', error.response)
-        // console.log('ERROR', Object.keys(error))
+        if(res.status === 400) new ErrorHandle().publish(res.data)
       });
   }
 
@@ -70,21 +91,11 @@ class LivroForm extends Component {
   }
 
   render() {
-    const form = this.state.form;
-
     return (
       <div className="pure-form pure-form-aligned">
         <ErrorBoundary>
           <form className="pure-form pure-form-aligned" name="form" onSubmit={this.save} method="post">
-            <Input label="Título" id="titulo" type="text" name="titulo" value={form.titulo}
-                   onChange={this.handleChange}></Input>
-
-            <Input label="Autor" id="autorId" type="select" name="autorId" value={form.autorId}
-                   selectList={this.state.autores} onChange={this.handleChange}></Input>
-
-            <Input label="Preço" id="preco" type="text" name="preco" value={form.preco}
-                   onChange={this.handleChange}></Input>
-
+            {this.fc.controls.map(c => <Input key={c.name} {...this.fc.default} {...c} />)}
             <div className="pure-control-group">
               <label></label>
               <button type="submit" className="pure-button pure-button-primary">Gravar</button>

@@ -23,7 +23,11 @@ class Input extends Component {
   }
   render() {
 
-    const {label, id, name, type, value, selectList, onChange} = this.props
+    const val = (v, params) => (typeof v === 'function') ? v(...(params || [])) : v;
+    const {label, id, name, type, onChange} = this.props
+    const value = val(this.props.value, [name])
+    const selectList = val(this.props.selectList)
+
     let template = '';
 
     switch (type) {
